@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+  database:
+    image: mysql:8
+    tty: true
+    ports:
+      - '4206:3306'
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=my_app
+    volumes:
+      - database:/var/lib/mysql
+    networks:
+      - mariadb
+  app:
+    image: firefox
+    ports:
+      - '8002:8002'
+    environment:
+      - DISPLAY=:0
+    volumes:
+      - /home:/home
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    depends_on:
+      - database
+    networks:
+      - mariadb
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    ports:
+      - "4000:80"
+    depends_on:
+      - database
+    networks:
+      - mariadb
+    environment:
+      - PMA_ARBITRARY=1
+    volumes:
+      - phpmyadmin:/var/www/html/phpmyadmin
+volumes:
+  database:
+  phpmyadmin:
+  app:
+networks:
+  mariadb:
+    driver: bridge
